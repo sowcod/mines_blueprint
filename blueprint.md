@@ -1,3 +1,4 @@
+![](http://g.gravizo.com/g?
 digraph min{
     Balancer[label="Balancer\n[nginx]"];
     Server[label="Server\n[Java]"];
@@ -21,3 +22,4 @@ digraph min{
     Mapper -> GameStorage [label="NFS"];
     
 }
+)
