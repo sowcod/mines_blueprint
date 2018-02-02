@@ -1,0 +1,52 @@
+digraph min{
+    User[label="User"]; 
+    subgraph cluster_master{
+        label="master";
+        KubeMaster[label="Kubernetes"];
+    };
+
+    subgraph cluster_tokyo{
+        label="Tokyo";
+
+        GameStorage[label="data\n[Presistent]", shape="box"];
+
+        subgraph cluster_gameserver {
+            label="Server";
+            GameDaemon[label="Daemon\n[Python]"];
+            GameApp[label="App"];
+
+        }
+
+        GameDaemon -> GameApp [headlabel=":9001"]; 
+        GameApp -> GameStorage [label="NFS"];
+    };
+    subgraph cluster_micro{
+        label="US(f1-micro)";
+
+        DummyServer[label="Dummy\n[Python]"];
+        subgraph cluster_web{
+            label="Web";
+            WebServer[label="nginx"];
+            WebApp[label="Django"];
+
+        };
+
+        WebServer -> WebApp[headlabel=":9010"];
+        WebServer -> MapStorage[label="NFS"];
+        WebApp -> GameDaemon[label="status", headlabel="9011:50011"];
+
+        DummyServer -> KubeMaster; 
+
+        MapStorage[label="map data\n[Presistent]", shape="box"];
+        
+        Mapper[label="Mapper\n[Python]"];
+        Mapper -> MapStorage [label="NFS"];
+        Mapper -> GameStorage [label="NFS"];
+    };
+
+    User -> WebServer[label="Infomation", headlabel="8080:80"];
+    User -> DummyServer[label="Up", headlabel="50001:50001"];
+    User -> GameApp[label="Play", headlabel="50002:50002"];
+
+    KubeMaster -> GameApp[label="Up"];
+}
