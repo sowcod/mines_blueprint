@@ -72,8 +72,22 @@ kubectlコマンドをインストールする
 
 ymlを使ってビルドするのが良いかも。
 
+使えるリージョンはus,eu,asia。クラスタのリージョンに近いのを選ぶと良いが、リージョン名は同じではない点に注意。
 
+https://cloud.google.com/container-registry/docs/pushing?hl=ja
 
+```yaml
+steps:
+    - name: 'gcr.io/cloud-builders/docker'
+      env: ['PROJECT_ROOT=usnode']
+      args: ['build', '--tag=us.gcr.io/$PROJECT_ID/usnode/servertest', '.']
+images: 
+    - 'us.gcr.io/$PROJECT_ID/usnode/servertest'
+```
+
+```bash
+$ gcloud container builds submit --config cloudbuild.yml .
+```
 
 
 
