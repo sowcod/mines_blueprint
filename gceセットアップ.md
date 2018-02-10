@@ -58,7 +58,8 @@ validNodeVersions:
 
 `gcloud container clusters create usnode --cluster-version=1.8.7-gke.0 --machine-type=f1-micro`
 
-kubectlがクラスタに接続できるように認証情報をダウンロードする。
+Webの管理画面でクラスタを作った場合、kubectlがクラスタに接続できるように認証情報をダウンロードする。
+上記のようにコマンドで作成した場合は不要。
 
 `gcloud container clusters get-credentials usnode`
 
@@ -84,11 +85,78 @@ steps:
 images: 
     - 'us.gcr.io/$PROJECT_ID/usnode/servertest'
 ```
+※$PROJECT_IDは展開する。
 
 ```bash
-$ gcloud container builds submit --config cloudbuild.yml .
+$ gcloud container builds submit --config=cloudbuild.yml .
 ```
 
+## Podデプロイ
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+    name: hello-world
+spec:
+    containers:
+        - image: us.gcr.io/$PROJECT_ID/usnode/servertest
+          imagePullPolicy: Always
+          name: hello-world
+```
+※$PROJECT_IDは展開する。
 
+`kubectl create -f pod.yaml`
 
+クラスタに接続テストする時は下記コマンドでlocalhost:portからポートフォワードさせる。
+
+`kubectl port-foward $POD_NAME localport:port`
+
+## ConfigMap
+Pod間で設定情報の共有ができる。
+```yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+    name: hello-world-config
+data:
+    hello-world.message: 'Hello!ConfigMap!'
+```
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+    name: hello-world
+spec:
+    containers:
+      - image: us.gcr.io/$PROJECT_ID/usnode/servertest
+        imagePullPolicy: Always
+        name: hello-world
+        env:
+          - name: TESTENV
+            valueFrom:
+                configMapKeyRef:
+                    name: hello-world-config
+                    key: hello-world.message
+```
+これで、hello-worldコンテナで、$TESTENVの中身が'Hello!ConfigMap!'となる。
+
+## ReplicaSet
+kind: ReplicaSetでyamlを作る。
+
+Podの数を常に一定に保つ機能。
+
+## Deployment
+kind: Deploymet。
+
+yamlの中身はReplicaSetとほぼ同じ。ただし、kubectl updateで
+反映する度に、前にupdateしたDeploymentを覚えた上で、最新のものに反映される。
+
+本番移行後に問題が発生した時に取り急ぎもとに戻すといったような使い方ができる。
+
+## Service
+
+クラスタの外側に向いているもの。
+
+概念はともかくとして、type:LoadBalancerのServiceを用いて、DeploymentもしくはReplicaSetの各Podに、外部からの接続が出来るようにする
 
