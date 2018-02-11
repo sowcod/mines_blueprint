@@ -73,7 +73,9 @@ kubectlコマンドをインストールする
 
 ymlを使ってビルドするのが良いかも。
 
-使えるリージョンはus,eu,asia。クラスタのリージョンに近いのを選ぶと良いが、リージョン名は同じではない点に注意。
+使えるリージョンはus,eu,asia。クラスタのリージョンに近いのを選ぶと良い。
+
+ただしイメージが配置されるストレージバケットのストレージクラスがMulti-Regionalになるので、事実上有料サービスである。
 
 https://cloud.google.com/container-registry/docs/pushing?hl=ja
 
@@ -90,6 +92,8 @@ images:
 ```bash
 $ gcloud container builds submit --config=cloudbuild.yml .
 ```
+
+どうしても無料で済ませたい場合は、DockerHubなどの無料リポジトリにイメージをPushする。
 
 ## Podデプロイ
 ```yaml
@@ -110,6 +114,12 @@ spec:
 クラスタに接続テストする時は下記コマンドでlocalhost:portからポートフォワードさせる。
 
 `kubectl port-foward $POD_NAME localport:port`
+
+このPodの例ではGoogle Container Registryのプライベートリポジトリから取得するものだが、
+その他のサービスのプライベートリポジトリからイメージをpullする時は、`kubectl create secret docker-registry`コマンド等を
+利用して認証情報を登録する。
+
+DockerHubのパブリックリポジトリからのpullであれば、認証情報は不要。
 
 ## ConfigMap
 Pod間で設定情報の共有ができる。
