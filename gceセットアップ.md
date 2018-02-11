@@ -170,3 +170,8 @@ yamlの中身はReplicaSetとほぼ同じ。ただし、kubectl updateで
 
 概念はともかくとして、type:LoadBalancerのServiceを用いて、DeploymentもしくはReplicaSetの各Podに、外部からの接続が出来るようにする
 
+## NodePool
+
+特定のPodだけは専用仕様ノードで、というような事をするには、NodePoolを作成する事で、異なるマシンタイプのノードを利用できる。
+
+ノードのリージョンも指定できるが、同じゾーン内という制限がある。例えばUSとJPをまたぐクラスタ構成は作ることができない。
