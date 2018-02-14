@@ -166,12 +166,19 @@ yamlの中身はReplicaSetとほぼ同じ。ただし、kubectl updateで
 
 ## Service
 
-クラスタの外側に向いているもの。
+クラスタの外側に向いているもの。外部IPからPodへポートフォワーディングが出来る。接続先はselector単位で指定する。
 
-概念はともかくとして、type:LoadBalancerのServiceを用いて、DeploymentもしくはReplicaSetの各Podに、外部からの接続が出来るようにする
+type:LoadBalancerやtype:IngressなどでServiceを定義すると、GCP等で提供されるロードバランサを利用する事が出来る。これはGCPでは課金対象となっている。
+
+https://cloud.google.com/compute/pricing?hl=ja
 
 ## NodePool
 
 特定のPodだけは専用仕様ノードで、というような事をするには、NodePoolを作成する事で、異なるマシンタイプのノードを利用できる。
 
 ノードのリージョンも指定できるが、同じゾーン内という制限がある。例えばUSとJPをまたぐクラスタ構成は作ることができない。
+
+NodePoolを全て削除する事で、マスタノードだけでNodeが0個のクラスタを作成する事が出来る。
+
+GCPではマスタノードには課金されないので、例えば東京にクラスタをセットアップして、
+必要な時だけノードプールを作るという運用にすれば、必要な時だけ課金されるクラスタを作る事が出来る。（と思う。未検証。）
